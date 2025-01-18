@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link href="https://uploadkon.ir/uploads/878b23_24image-249.png" rel="shortcut icon">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;900&display=swap" rel="stylesheet">
+<meta content="width=device-width, initial-scale=1" name="viewport" />
+<meta charset="UTF-8">
+<title>Image Adjustment for PNG Camera</title>
+<style>
+    body {
+        font-family: Rubik, Arial, sans-serif;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 515px;
+        margin: 15px auto;
+        background: #d2d2d2;
+    }
+    h1 {
+        font-size: larger;
+    }
+    canvas {
+        border: 1px solid #ccc;
+        margin-top: 20px;
+        width: 80%;
+    }
+    .box {
+        width: 80%;
+        border-radius: 30px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background: #fff;
+        padding: 15px 10px;
+        box-shadow: 0px 10px 36px -16px #bbb;
+        border: 2px solid #bfbfbf;
+    }
+    label {
+        margin-bottom: 10px;
+    }
+    select {
+        margin-bottom: 15px;
+    }
+    @media (max-width: 850px) {
+        body {
+            max-width: 100%;
+        }
+        .box {
+            max-width: 80%;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="box">
+    <h1>Image Adjustment for PNG Camera</h1>
+    <div style="direction: ltr;">
+        <label for="overlaySelection">Select Overlay:</label>
+        <select id="overlaySelection">
+            <option value="camera1">Overlay 1</option>
+            <option value="camera2">Overlay 2</option>
+            <option value="camera3">Overlay 3</option>
+        </select>
+    </div>
+    <div style="direction: ltr;">
+        <label for="upload">Select File from Gallery:</label>
+        <input type="file" id="upload" accept="image/*">
+    </div>
+    <canvas id="canvas"></canvas>
+    <button id="download">Download Standard</button>
+    <button id="downloadSmall">Download Small</button>
+</div>
+<script>
+const uploadInput = document.getElementById('upload');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const downloadButton = document.getElementById('download');
+const downloadSmallButton = document.getElementById('downloadSmall');
+const overlaySelection = document.getElementById('overlaySelection');
+
+const overlayImages = {
+    camera1: "https://github.com/iweiu1005/video-overlay/blob/d303f6074a2e42d6412ffe5f5bbce89951baf88c/assets/Png%20Camera%201.png",
+    camera2: "https://github.com/iweiu1005/video-overlay/blob/d303f6074a2e42d6412ffe5f5bbce89951baf88c/assets/Png%20Camera%202.png",
+    camera3: "https://github.com/iweiu1005/video-overlay/blob/2a46a7a5af738d38a82af16f0e0cca60df829ec0/assets/Png%20Camera%203.png"
+};
+
+let currentImage = null; // Store the uploaded image
+
+function loadOverlayImage(selectedOverlay, callback) {
+    const overlayImage = new Image();
+    overlayImage.src = overlayImages[selectedOverlay];
+    overlayImage.onload = () => {
+        canvas.width = overlayImage.width;
+        canvas.height = overlayImage.height;
+        callback(overlayImage);
+    };
+}
+
+function processImage(img, overlayImage, selectedOverlay) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let targetWidth, targetHeight, offsetX, offsetY;
+
+    if (selectedOverlay === 'camera1') {
+        targetWidth = 524;
+        targetHeight = 400;
+        offsetX = 62;
+        offsetY = 106;
+    } else if (selectedOverlay === 'camera2') {
+        targetWidth = 390;
+        targetHeight = 296;
+        offsetX = 46;
+        offsetY = 154;
+    } else if (selectedOverlay === 'camera3') {
+        targetWidth = 530;
+        targetHeight = 400;
+        offsetX = 58;
+        offsetY = 107.5;
+    }
+
+    ctx.drawImage(img, offsetX, offsetY, targetWidth, targetHeight);
+    ctx.drawImage(overlayImage, 0, 0, overlayImage.width, overlayImage.height);
+}
+
+function updateOverlay() {
+    const selectedOverlay = overlaySelection.value;
+    if (currentImage) {
+        loadOverlayImage(selectedOverlay, (overlayImage) => processImage(currentImage, overlayImage, selectedOverlay));
+    }
+}
+
+uploadInput.addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const img = new Image();
+        const reader = new FileReader();
+
+        reader.onload = (e) => {
+            img.src = e.target.result;
+        };
+
+        img.onload = () => {
+            currentImage = img;
+            updateOverlay();
+        };
+
+        reader.readAsDataURL(file);
+    }
+});
+
+overlaySelection.addEventListener('change', updateOverlay);
+
+downloadButton.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'camera-pic.png';
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+});
+
+downloadSmallButton.addEventListener('click', () => {
+    const smallCanvas = document.createElement('canvas');
+    const scaleFactor = 512 / canvas.width;
+    smallCanvas.width = 512;
+    smallCanvas.height = canvas.height * scaleFactor;
+    const smallCtx = smallCanvas.getContext('2d');
+    smallCtx.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+    const link = document.createElement('a');
+    link.download = 'camera-pic-small.png';
+    link.href = smallCanvas.toDataURL("image/png");
+    link.click();
+});
+</script>
+</body>
+</html>
