@@ -91,6 +91,7 @@ let currentImage = null; // Store the uploaded image
 
 function loadOverlayImage(selectedOverlay, callback) {
     const overlayImage = new Image();
+    overlayImage.crossOrigin = "anonymous";  // Enable CORS
     overlayImage.src = overlayImages[selectedOverlay];
     overlayImage.onload = () => {
         canvas.width = overlayImage.width;
@@ -135,6 +136,7 @@ uploadInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
         const img = new Image();
+        img.crossOrigin = "anonymous";  // Enable CORS
         const reader = new FileReader();
 
         reader.onload = (e) => {
